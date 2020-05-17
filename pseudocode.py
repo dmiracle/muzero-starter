@@ -543,8 +543,8 @@ def train_network(config: MuZeroConfig, storage: SharedStorage,
                   replay_buffer: ReplayBuffer):
   network = Network()
   learning_rate = config.lr_init * config.lr_decay_rate**(
-      tf.train.get_global_step() / config.lr_decay_steps)
-  optimizer = tf.train.MomentumOptimizer(learning_rate, config.momentum)
+      tf.compat.v1.train.get_global_step() / config.lr_decay_steps)
+  optimizer = tf.compat.v1.train.MomentumOptimizer(learning_rate, config.momentum)
 
   for i in range(config.training_steps):
     if i % config.checkpoint_interval == 0:
@@ -554,7 +554,7 @@ def train_network(config: MuZeroConfig, storage: SharedStorage,
   storage.save_network(config.training_steps, network)
 
 
-def update_weights(optimizer: tf.train.Optimizer, network: Network, batch,
+def update_weights(optimizer: tf.compat.v1.train.Optimizer, network: Network, batch,
                    weight_decay: float):
   loss = 0
   for image, actions, targets in batch:
@@ -581,7 +581,7 @@ def update_weights(optimizer: tf.train.Optimizer, network: Network, batch,
           tf.nn.softmax_cross_entropy_with_logits(
               logits=policy_logits, labels=target_policy))
 
-      loss += tf.scale_gradient(l, gradient_scale)
+      loss += tf.compat.v1.scale_gradient(l, gradient_scale)
 
   for weights in network.get_weights():
     loss += weight_decay * tf.nn.l2_loss(weights)
